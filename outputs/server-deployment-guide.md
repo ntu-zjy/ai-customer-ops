@@ -80,27 +80,57 @@ openssl rand -hex 32
   hermes-gateway.service
 ```
 
-## 3. 上传项目代码
+## 3. 获取项目代码
 
-在服务器上先建目录：
+推荐使用 GitHub 私有仓库部署，当前仓库为：
 
-```bash
-sudo mkdir -p /opt/event-crm/app
-sudo chown -R "$USER:$USER" /opt/event-crm/app
+```text
+https://github.com/ntu-zjy/ai-customer-ops
 ```
 
-从本机上传项目。任选一种方式：
+### 3.1 服务器配置 GitHub 拉取权限
+
+如果服务器只是部署用，推荐在腾讯云 CVM 上生成一把单独的 SSH key：
 
 ```bash
-# 方式 A：rsync
-rsync -av --exclude .venv --exclude work --exclude .pytest_cache \
-  /本机/项目目录/ ubuntu@<公网IP>:/opt/event-crm/app/
+ssh-keygen -t ed25519 -C "event-crm-cvm" -f ~/.ssh/event_crm_github
+cat ~/.ssh/event_crm_github.pub
+```
 
-# 方式 B：scp tar 包
-tar --exclude .venv --exclude work --exclude .pytest_cache -czf event-crm.tar.gz .
-scp event-crm.tar.gz ubuntu@<公网IP>:/tmp/
-ssh ubuntu@<公网IP>
-sudo tar -xzf /tmp/event-crm.tar.gz -C /opt/event-crm/app
+把输出的公钥添加到 GitHub：
+
+```text
+GitHub -> ntu-zjy/ai-customer-ops -> Settings -> Deploy keys -> Add deploy key
+```
+
+只需要勾选读权限即可；如果希望服务器上也能直接 push，再勾选写权限。
+
+然后在服务器上添加 SSH 配置：
+
+```bash
+cat >> ~/.ssh/config <<'EOF'
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/event_crm_github
+  IdentitiesOnly yes
+EOF
+
+chmod 600 ~/.ssh/config
+ssh -T git@github.com
+```
+
+如果你不想配置 Deploy Key，也可以用 HTTPS + GitHub token，但不建议把 token 写进脚本或文档。
+
+### 3.2 Clone 代码到部署目录
+
+在服务器上建目录并拉代码：
+
+```bash
+sudo mkdir -p /opt/event-crm
+sudo chown -R "$USER:$USER" /opt/event-crm
+cd /opt/event-crm
+git clone git@github.com:ntu-zjy/ai-customer-ops.git app
 ```
 
 确认服务器上能看到项目文件：
@@ -108,6 +138,14 @@ sudo tar -xzf /tmp/event-crm.tar.gz -C /opt/event-crm/app
 ```bash
 ls -la /opt/event-crm/app
 ls -la /opt/event-crm/app/scripts/install_ubuntu.sh
+```
+
+后续更新代码时，在服务器执行：
+
+```bash
+cd /opt/event-crm/app
+git pull --ff-only
+sudo systemctl restart event-crm
 ```
 
 ## 4. 安装系统依赖和 CRM 服务
