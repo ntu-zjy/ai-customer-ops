@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Event CRM user analysis hourly
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=1h
+AccuracySec=30s
+Unit=event-crm-analyze.service
+
+[Install]
+WantedBy=timers.target
+

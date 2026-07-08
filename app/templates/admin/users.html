@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>客户管理</h1>
+    <p>最近 {{ users|length }} 位企微私聊客户</p>
+  </div>
+  <form class="filters" method="get" action="/admin/users">
+    <input type="search" name="q" value="{{ q }}" placeholder="搜索用户 ID">
+    <select name="stage">
+      <option value="">全部阶段</option>
+      {% for item in stages %}
+      <option value="{{ item }}" {% if item == stage %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">筛选</button>
+  </form>
+</section>
+
+<section class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>用户</th>
+        <th>阶段</th>
+        <th>意向</th>
+        <th>标签</th>
+        <th>消息</th>
+        <th>最近活跃</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>
+          <a class="primary-link" href="/admin/users/{{ user.id }}">{{ user.display_name or user.external_user_id }}</a>
+          <span class="subtle mono">{{ user.external_user_id }}</span>
+        </td>
+        <td><span class="stage">{{ stage_label(user.customer_stage) }}</span></td>
+        <td>{{ user.profile.intent_score if user.profile else 0 }}</td>
+        <td>
+          <div class="tags">
+            {% for tag in user.tags %}
+            <span>{{ tag.tag }}</span>
+            {% endfor %}
+          </div>
+        </td>
+        <td>{{ user.message_count }}</td>
+        <td>{{ (user.last_event_at or user.last_message_at)|datetime }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="empty">暂无同步用户</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

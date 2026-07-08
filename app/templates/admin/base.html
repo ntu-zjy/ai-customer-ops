@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ settings.app_name }}</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='style.css') }}">
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/admin/workbench">AI客户经营系统</a>
+      <nav class="side-nav">
+        <a href="/admin/workbench">首页</a>
+        <a href="/admin/users">客户管理</a>
+        <a href="/admin/settings/knowledge">知识库</a>
+        <a href="/admin/rules">规则配置</a>
+        <a href="/admin/marketing">营销素材</a>
+        <a href="/admin/dashboard">老板看板</a>
+        <a href="/admin/settings/knowledge">设置</a>
+      </nav>
+      <span class="collapse-link">收起菜单</span>
+    </aside>
+    <div class="app-frame">
+      <header class="topbar">
+        <form class="global-search" method="get" action="/admin/users">
+          <input type="search" name="q" placeholder="搜索客户、手机号、标签、问题等">
+        </form>
+        <div class="top-actions">
+          <span class="role-chip">员工视角</span>
+          <span class="bell">8</span>
+          <span class="avatar">张</span>
+        </div>
+      </header>
+      <main class="shell">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

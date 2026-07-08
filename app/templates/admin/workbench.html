@@ -1,0 +1,144 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <h1>员工工作台</h1>
+    <p>客户接待、跟进提醒、AI推荐动作和知识库优化</p>
+  </div>
+  <a class="soft-button" href="/admin/dashboard">老板视角</a>
+</section>
+
+<section class="kpi-grid">
+  {% for kpi in data.kpis %}
+  <article class="metric-card">
+    <span class="metric-icon">{{ loop.index }}</span>
+    <div>
+      <p>{{ kpi.label }}</p>
+      <strong>{{ kpi.value }}</strong>
+      <small>{{ kpi.hint }}</small>
+    </div>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="workspace-grid">
+  <div class="main-column">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>客户列表</h2>
+        <div class="inline-controls">
+          <a href="/admin/users">全部客户</a>
+        </div>
+      </div>
+      <table class="dense-table">
+        <thead>
+          <tr>
+            <th>客户</th>
+            <th>来源</th>
+            <th>阶段</th>
+            <th>意向</th>
+            <th>负责人</th>
+            <th>下一步动作</th>
+            <th>最近互动</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in data.users[:8] %}
+          {% set suggestion = data.suggestions|selectattr("user.id", "equalto", user.id)|list %}
+          <tr>
+            <td>
+              <a class="primary-link" href="/admin/users/{{ user.id }}">{{ user.display_name or user.external_user_id }}</a>
+              <span class="subtle mono">{{ user.external_user_id }}</span>
+            </td>
+            <td>{{ user.source_channel or user.platform }}</td>
+            <td><span class="stage">{{ stage_label(user.customer_stage) }}</span></td>
+            <td><span class="stars">★★★★<span>★</span></span></td>
+            <td>{{ user.owner_name or "未分配" }}</td>
+            <td>{{ suggestion[0].suggestion.message if suggestion else "继续接待" }}</td>
+            <td>{{ (user.last_event_at or user.last_message_at)|datetime }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="empty">暂无同步客户</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel customer-summary">
+      <div class="panel-head">
+        <h2>客户摘要</h2>
+        {% if data.selected_user %}
+        <a href="/admin/users/{{ data.selected_user.id }}">查看客户详情</a>
+        {% endif %}
+      </div>
+      {% if data.selected_user %}
+      <div class="summary-grid">
+        <div class="profile-block">
+          <span class="avatar large">{{ (data.selected_user.display_name or data.selected_user.external_user_id)[:1] }}</span>
+          <h3>{{ data.selected_user.display_name or data.selected_user.external_user_id }}</h3>
+          <p class="subtle">{{ data.selected_user.source_channel or data.selected_user.platform }} · {{ stage_label(data.selected_user.customer_stage) }}</p>
+          <div class="tags">
+            {% for tag in data.selected_user.tags %}
+            <span>{{ tag.tag }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div>
+          <h3>最新摘要</h3>
+          <p>{{ data.selected_user.profile.summary if data.selected_user.profile else "尚未生成画像，等待同步更多对话。" }}</p>
+        </div>
+        <div>
+          <h3>推荐动作</h3>
+          <p>{{ data.selected_suggestion.message }}</p>
+          <button type="button">{{ data.selected_suggestion.target }}</button>
+        </div>
+      </div>
+      {% else %}
+      <p class="empty">暂无客户可展示</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <aside class="side-column">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>AI推荐动作</h2>
+        <span>换一批</span>
+      </div>
+      <div class="action-list">
+        {% for item in data.suggestions %}
+        <article>
+          <strong>{{ item.suggestion.target }}</strong>
+          <p>{{ item.user.display_name or item.user.external_user_id }}：{{ item.suggestion.message }}</p>
+          <a href="/admin/users/{{ item.user.id }}">去处理</a>
+        </article>
+        {% else %}
+        <p class="empty">暂无推荐动作</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>待办提醒</h2><span>全部待办</span></div>
+      <div class="reminders">
+        {% for item in data.reminders %}
+        <div><span>{{ item.label }}</span><strong>{{ item.count }}</strong></div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>知识库待优化问题</h2><span>全部问题</span></div>
+      <ol class="question-list">
+        {% for item in data.questions %}
+        <li><span>{{ item.question }}</span><small>出现 {{ item.count }} 次</small></li>
+        {% else %}
+        <li class="empty">暂无高频问题</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </aside>
+</section>
+{% endblock %}
+

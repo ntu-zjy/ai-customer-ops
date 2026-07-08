@@ -1,0 +1,125 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <h1>老板经营看板</h1>
+    <p>客户、渠道、转化、员工跟进和战略 Agent</p>
+  </div>
+  <form class="date-controls">
+    <select><option>最近7天</option></select>
+    <select><option>对比：上周</option></select>
+  </form>
+</section>
+
+<section class="boss-grid">
+  <div class="boss-main">
+    <section class="kpi-grid compact">
+      {% for kpi in data.kpis %}
+      <article class="metric-card">
+        <span class="metric-icon">{{ loop.index }}</span>
+        <div>
+          <p>{{ kpi.label }}</p>
+          <strong>{{ kpi.value }}</strong>
+          <small>{{ kpi.hint }}</small>
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>转化漏斗</h2><span>绝对数</span></div>
+      <div class="funnel">
+        {% for item in data.funnel %}
+        <div class="funnel-step" style="--w: {{ 24 + item.rate }}%;">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.count }}</strong>
+          <small>{{ item.rate }}%</small>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="dashboard-two">
+      <div class="panel">
+        <div class="panel-head"><h2>渠道效果分析</h2><span>近7天</span></div>
+        <div class="bar-list">
+          {% for item in data.source_counts %}
+          <div>
+            <span>{{ item.source }}</span>
+            <meter min="0" max="{{ data.total_users or 1 }}" value="{{ item.count }}"></meter>
+            <strong>{{ item.count }}</strong>
+          </div>
+          {% else %}
+          <p class="empty">暂无渠道数据</p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>客户阶段分布</h2><span>{{ data.total_users }} 总客户</span></div>
+        <div class="stage-cloud">
+          {% for item in data.stage_counts %}
+          <div><span>{{ item.label }}</span><strong>{{ item.count }}</strong></div>
+          {% else %}
+          <p class="empty">暂无阶段数据</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-two">
+      <div class="panel">
+        <div class="panel-head"><h2>员工跟进效率</h2><span>负责人</span></div>
+        <table class="dense-table mini">
+          <thead><tr><th>员工</th><th>客户数</th><th>最近跟进</th></tr></thead>
+          <tbody>
+          {% for row in data.employee_rows %}
+          <tr><td>{{ row.owner }}</td><td>{{ row.customers }}</td><td>{{ row.last_event_at|datetime }}</td></tr>
+          {% else %}
+          <tr><td colspan="3" class="empty">暂无员工数据</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>客户高频关注问题</h2><span>近7天</span></div>
+        <ol class="question-list ranked">
+          {% for item in data.top_questions %}
+          <li><span>{{ item.question }}</span><small>{{ item.count }}</small></li>
+          {% else %}
+          <li class="empty">暂无高频问题</li>
+          {% endfor %}
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <aside class="boss-side">
+    <section class="panel agent-panel">
+      <div class="panel-head"><h2>战略Agent</h2><span>老板</span></div>
+      <div class="chat-bubble user">最近哪个渠道质量最高？</div>
+      <div class="chat-bubble ai">
+        {% if answer %}
+        {{ answer }}
+        {% else %}
+        {{ data.advice|join(" ") }}
+        {% endif %}
+      </div>
+      <form method="post" action="/admin/dashboard/ask" class="agent-form">
+        <input name="question" value="{{ question }}" placeholder="向战略Agent提问...">
+        <button type="submit">发送</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>经营提醒</h2><span>建议</span></div>
+      <ol class="advice-list">
+        {% for item in data.advice %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </aside>
+</section>
+{% endblock %}
+

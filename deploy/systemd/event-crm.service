@@ -1,0 +1,16 @@
+[Unit]
+Description=Event CRM FastAPI service
+After=network.target postgresql.service
+
+[Service]
+User=eventcrm
+Group=eventcrm
+WorkingDirectory=/opt/event-crm/app
+EnvironmentFile=/etc/event-crm/event-crm.env
+ExecStart=/opt/event-crm/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,17 @@
+[Unit]
+Description=Hermes Agent gateway for Event CRM
+After=network.target
+
+[Service]
+User=eventcrm
+Group=eventcrm
+WorkingDirectory=/opt/event-crm
+Environment=HERMES_HOME=/opt/event-crm/hermes-home
+EnvironmentFile=-/etc/event-crm/hermes.env
+ExecStart=/usr/local/bin/hermes gateway
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

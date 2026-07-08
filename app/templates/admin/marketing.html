@@ -1,0 +1,129 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <h1>营销素材 Skill</h1>
+    <p>给 Agent 配置小红书图文生成能力，输出标题、封面文案、分镜、配图提示词和正文标签</p>
+  </div>
+  <span class="soft-button">小红书图文</span>
+</section>
+
+<section class="marketing-grid">
+  <form class="panel marketing-form" method="post" action="/admin/marketing/generate">
+    <div class="panel-head">
+      <h2>生成小红书图文包</h2>
+      <span>Agent Skill</span>
+    </div>
+    <label>主题 / 活动 / 产品</label>
+    <input name="topic" placeholder="例如：AI赋能企业增长实战营" required>
+
+    <label>目标人群</label>
+    <input name="audience" placeholder="例如：小微企业老板、运营负责人、教培机构校长">
+
+    <label>营销目标</label>
+    <select name="goal">
+      <option value="引导咨询和报名">引导咨询和报名</option>
+      <option value="引导入群">引导入群</option>
+      <option value="活动预热">活动预热</option>
+      <option value="成交转化">成交转化</option>
+      <option value="品牌种草">品牌种草</option>
+    </select>
+
+    <label>内容语气</label>
+    <select name="tone">
+      <option value="真实、清爽、有行动感">真实、清爽、有行动感</option>
+      <option value="老板视角、直接、重结果">老板视角、直接、重结果</option>
+      <option value="员工运营视角、实用、步骤清晰">员工运营视角、实用、步骤清晰</option>
+      <option value="轻松种草、生活化、不硬广">轻松种草、生活化、不硬广</option>
+    </select>
+
+    <label>补充资料</label>
+    <textarea name="source_context" rows="7" placeholder="活动亮点、时间地点、适合人群、报名方式、注意事项等。留空也可基于CRM高频问题生成。"></textarea>
+
+    <button type="submit">生成图文</button>
+  </form>
+
+  <section class="panel marketing-result">
+    <div class="panel-head">
+      <h2>生成结果</h2>
+      {% if selected %}<span>{{ selected.created_at|datetime }}</span>{% endif %}
+    </div>
+    {% if selected %}
+    {% set result = selected.result %}
+    <div class="asset-head">
+      <span class="stage">{{ selected.topic }}</span>
+      <strong>{{ result.cover_text }}</strong>
+      <p>{{ result.hook }}</p>
+    </div>
+
+    <h3>标题备选</h3>
+    <ol class="title-options">
+      {% for title in result.title_options %}
+      <li>{{ title }}</li>
+      {% endfor %}
+    </ol>
+
+    <h3>图文分镜</h3>
+    <div class="slide-list">
+      {% for slide in result.slides %}
+      <article>
+        <span>{{ slide.index }}</span>
+        <div>
+          <strong>{{ slide.title }}</strong>
+          <p>{{ slide.body }}</p>
+          <small>配图提示词：{{ slide.visual_prompt }}</small>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <h3>正文</h3>
+    <pre class="caption-box">{{ result.caption }}</pre>
+
+    <div class="tags">
+      {% for tag in result.hashtags %}
+      <span>{{ tag }}</span>
+      {% endfor %}
+    </div>
+
+    <p class="suggestion">{{ result.cta }}</p>
+    <p class="subtle">{{ result.design_notes }}</p>
+    {% else %}
+    <p class="empty">还没有生成过素材。填写左侧表单后，Agent 会产出一套小红书图文包。</p>
+    {% endif %}
+  </section>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>历史素材</h2>
+    <span>{{ assets|length }} 条</span>
+  </div>
+  <table class="dense-table">
+    <thead>
+      <tr>
+        <th>主题</th>
+        <th>目标</th>
+        <th>人群</th>
+        <th>生成时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for asset in assets %}
+      <tr>
+        <td>{{ asset.topic }}</td>
+        <td>{{ asset.goal }}</td>
+        <td>{{ asset.audience or "-" }}</td>
+        <td>{{ asset.created_at|datetime }}</td>
+        <td><a class="primary-link" href="/admin/marketing?asset_id={{ asset.id }}">查看</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty">暂无历史素材</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
+

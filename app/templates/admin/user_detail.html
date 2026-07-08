@@ -1,0 +1,97 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <a class="back-link" href="/admin/users">返回客户</a>
+    <h1>{{ user.display_name or user.external_user_id }}</h1>
+    <p class="mono">{{ user.id }}</p>
+  </div>
+  <form class="inline-controls" method="post" action="/admin/users/{{ user.id }}/analyze">
+    <button type="submit">重新分析</button>
+  </form>
+</section>
+
+<section class="detail-grid">
+  <div class="panel">
+    <div class="panel-head"><h2>客户阶段与画像</h2><span>{{ stage_label(user.customer_stage) }}</span></div>
+    <form class="stage-form" method="post" action="/admin/users/{{ user.id }}/stage">
+      <select name="customer_stage">
+        {% for item in stages %}
+        <option value="{{ item }}" {% if item == user.customer_stage %}selected{% endif %}>{{ stage_label(item) }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">更新阶段</button>
+    </form>
+    {% if user.profile %}
+    <dl class="facts">
+      <div><dt>AI建议阶段</dt><dd>{{ user.profile.stage }}</dd></div>
+      <div><dt>意向分</dt><dd>{{ user.profile.intent_score }}</dd></div>
+      <div><dt>更新时间</dt><dd>{{ user.profile.updated_at|datetime }}</dd></div>
+    </dl>
+    <p>{{ user.profile.summary }}</p>
+    <p class="suggestion">{{ user.profile.follow_up_suggestion }}</p>
+    <div class="tags">
+      {% for tag in user.tags %}
+      <span>{{ tag.tag }}</span>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">尚未生成画像</p>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>推荐动作</h2><span>{{ suggestion.action }}</span></div>
+    <p class="suggestion">{{ suggestion.message }}</p>
+    <dl class="facts">
+      <div><dt>目标</dt><dd>{{ suggestion.target }}</dd></div>
+      <div><dt>规则</dt><dd>{{ suggestion.rule_name }}</dd></div>
+    </dl>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>基础信息</h2></div>
+    <dl class="facts">
+      <div><dt>平台</dt><dd>{{ user.platform }}</dd></div>
+      <div><dt>Bot</dt><dd>{{ user.bot_id }}</dd></div>
+      <div><dt>来源</dt><dd>{{ user.source_channel or "-" }}</dd></div>
+      <div><dt>负责人</dt><dd>{{ user.owner_name or "未分配" }}</dd></div>
+      <div><dt>首次出现</dt><dd>{{ user.first_seen_at|datetime }}</dd></div>
+      <div><dt>最近事件</dt><dd>{{ (user.last_event_at or user.last_message_at)|datetime }}</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="timeline event-timeline">
+  <h2>客户事件</h2>
+  {% for event in events %}
+  <article class="message event">
+    <header>
+      <span>{{ event.event_type }}</span>
+      <span>{{ event.actor }}</span>
+      <time>{{ event.created_at|datetime }}</time>
+    </header>
+    <p>{{ event.title }}{% if event.detail %}：{{ event.detail }}{% endif %}</p>
+  </article>
+  {% else %}
+  <p class="empty">暂无事件</p>
+  {% endfor %}
+</section>
+
+<section class="timeline">
+  <h2>对话记录</h2>
+  {% for message in messages %}
+  <article class="message {{ message.role }}">
+    <header>
+      <span>{{ message.role }}</span>
+      <span>{{ message.message_type }}</span>
+      <time>{{ message.created_at|datetime }}</time>
+    </header>
+    <p>{{ message.content or "（空内容或媒体消息）" }}</p>
+  </article>
+  {% else %}
+  <p class="empty">暂无消息</p>
+  {% endfor %}
+</section>
+{% endblock %}

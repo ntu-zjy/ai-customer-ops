@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <h1>知识库与规则配置</h1>
+    <p>活动/社群模板的客户阶段分流规则</p>
+  </div>
+  <a class="soft-button" href="/admin/settings/knowledge">知识文档</a>
+</section>
+
+{% if saved %}
+<p class="notice">规则已保存</p>
+{% endif %}
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>分流规则</h2>
+    <span>规则按优先级执行，v0.2 只生成建议动作</span>
+  </div>
+  <div class="rule-list">
+    {% for rule in rules %}
+    <form class="rule-row" method="post" action="/admin/rules/{{ rule.id }}">
+      <div>
+        <strong>{{ rule.name }}</strong>
+        <span class="subtle">{{ stage_label(rule.from_stage) }} · {{ rule.action }}</span>
+      </div>
+      <input name="target" value="{{ rule.target }}" placeholder="目标资源">
+      <input name="priority" type="number" min="1" value="{{ rule.priority }}">
+      <label class="toggle"><input type="checkbox" name="enabled" {% if rule.enabled %}checked{% endif %}>启用</label>
+      <textarea name="message" rows="2">{{ rule.message }}</textarea>
+      <button type="submit">保存</button>
+    </form>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+

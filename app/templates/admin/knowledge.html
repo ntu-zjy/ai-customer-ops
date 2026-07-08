@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>知识库</h1>
+    <p>共享活动资料 URL，员工维护，AI客服引用</p>
+  </div>
+  <a class="soft-button" href="/admin/rules">规则配置</a>
+</section>
+
+{% if saved %}
+<p class="notice">已保存</p>
+{% endif %}
+
+<form class="settings-form" method="post" action="/admin/settings/knowledge">
+  <label for="urls_text">飞书文档 / 知识库 URL</label>
+  <textarea id="urls_text" name="urls_text" rows="10" placeholder="每行一个 URL">{{ urls_text }}</textarea>
+  <button type="submit">保存</button>
+</form>
+
+<section class="panel knowledge-placeholders">
+  <div class="panel-head"><h2>AI未解决高频问题</h2><span>占位列表</span></div>
+  <ol class="question-list">
+    <li><span>课程/活动价格和优惠政策</span><small>建议补充 FAQ</small></li>
+    <li><span>报名后多久可以开课/入群</span><small>建议写清流程</small></li>
+    <li><span>退款、发票、资料领取</span><small>建议设置人工兜底</small></li>
+  </ol>
+</section>
+{% endblock %}

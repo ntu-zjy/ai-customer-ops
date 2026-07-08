@@ -1,0 +1,12 @@
+[Unit]
+Description=Analyze Event CRM users with new messages
+After=postgresql.service
+
+[Service]
+Type=oneshot
+User=eventcrm
+Group=eventcrm
+WorkingDirectory=/opt/event-crm/app
+EnvironmentFile=/etc/event-crm/event-crm.env
+ExecStart=/opt/event-crm/.venv/bin/python -m app.cli analyze-due --limit 50
+
