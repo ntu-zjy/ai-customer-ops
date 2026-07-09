@@ -82,15 +82,32 @@ openssl rand -hex 32
 
 ## 3. 获取项目代码
 
-推荐使用 GitHub 私有仓库部署，当前仓库为：
+推荐使用 GitHub 仓库部署，当前仓库为：
 
 ```text
 https://github.com/ntu-zjy/ai-customer-ops
 ```
 
-### 3.1 服务器配置 GitHub 拉取权限
+### 3.1 Public 仓库：直接 HTTPS Clone
 
-如果服务器只是部署用，推荐在腾讯云 CVM 上生成一把单独的 SSH key：
+如果仓库是 public，服务器不需要 GitHub Deploy Key。直接用 HTTPS 拉取：
+
+```bash
+sudo mkdir -p /opt/event-crm
+sudo chown -R "$USER:$USER" /opt/event-crm
+cd /opt/event-crm
+git clone https://github.com/ntu-zjy/ai-customer-ops.git app
+```
+
+注意：不要使用下面这种 SSH 地址，除非你已经配置了 SSH key 或 Deploy Key：
+
+```text
+git@github.com:ntu-zjy/ai-customer-ops.git
+```
+
+### 3.2 Private 仓库：配置 GitHub 拉取权限
+
+如果仓库改回 private，或者你希望服务器用 SSH 方式拉取，再在腾讯云 CVM 上生成一把单独的 SSH key：
 
 ```bash
 ssh-keygen -t ed25519 -C "event-crm-cvm" -f ~/.ssh/event_crm_github
@@ -122,9 +139,9 @@ ssh -T git@github.com
 
 如果你不想配置 Deploy Key，也可以用 HTTPS + GitHub token，但不建议把 token 写进脚本或文档。
 
-### 3.2 Clone 代码到部署目录
+### 3.3 Clone 代码到部署目录
 
-在服务器上建目录并拉代码：
+如果已经按 3.1 用 HTTPS clone 过，可以跳过这一节。否则，配置好 Deploy Key 后再用 SSH clone：
 
 ```bash
 sudo mkdir -p /opt/event-crm
