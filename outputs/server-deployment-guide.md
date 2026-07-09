@@ -260,6 +260,10 @@ HERMES_API_BASE_URL=http://127.0.0.1:8642/v1
 HERMES_API_KEY=<HERMES_API_SERVER_KEY>
 HERMES_MODEL_NAME=hermes-agent
 
+WECOM_KF_TOKEN=<微信客服回调 Token>
+WECOM_KF_ENCODING_AES_KEY=<微信客服 EncodingAESKey>
+WECOM_CORP_ID=<企业微信 Corp ID>
+
 SYNC_BATCH_SIZE=500
 ANALYZE_DUE_LIMIT=50
 ADMIN_PAGE_SIZE=100
@@ -270,6 +274,7 @@ ADMIN_PAGE_SIZE=100
 - `HERMES_BOT_ID` 必须和企业微信 AI Bot 一致。
 - `HERMES_API_KEY` 必须等于下一节 Hermes 的 `API_SERVER_KEY`。
 - `HERMES_STATE_DB` 指向独立 Hermes home 下的 `state.db`。
+- `WECOM_KF_*` 用于普通微信外部用户访问的“微信客服”回调验证；如果暂时只测内部企微 Bot，可以先留空。
 
 如果你要修改数据库默认密码：
 
@@ -310,6 +315,24 @@ API_SERVER_KEY=<HERMES_API_SERVER_KEY>
 sudo chmod 640 /etc/event-crm/event-crm.env /etc/event-crm/hermes.env
 sudo chown root:eventcrm /etc/event-crm/event-crm.env /etc/event-crm/hermes.env
 ```
+
+### 6.3 配置微信客服回调（外部微信用户）
+
+如果要让普通微信用户咨询，创建企业微信“微信客服”账号后，在微信客服 API / 回调配置里填写：
+
+```text
+URL: http://<服务器公网 IP>/wecom/kf/callback
+Token: 自己生成一段随机字符串，写入 WECOM_KF_TOKEN
+EncodingAESKey: 企微后台随机生成，写入 WECOM_KF_ENCODING_AES_KEY
+```
+
+同时在 `/etc/event-crm/event-crm.env` 填入企业微信 `Corp ID`：
+
+```bash
+WECOM_CORP_ID=<企业微信 Corp ID>
+```
+
+当前代码会完成企业微信 URL 验证和回调确认。真实客户消息解密、调用 Hermes 回复、写入 CRM 的完整客服链路在后续版本补齐。
 
 ## 7. 初始化 Hermes 独立 Home
 

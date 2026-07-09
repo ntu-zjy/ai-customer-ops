@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .admin import router as admin_router
 from .config import get_settings
+from .wecom_kf import router as wecom_kf_router
 
 
 def create_app() -> FastAPI:
@@ -13,6 +14,7 @@ def create_app() -> FastAPI:
     static_dir = Path(__file__).parent / "static"
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
     app.include_router(admin_router)
+    app.include_router(wecom_kf_router)
 
     @app.get("/healthz")
     def healthz() -> dict[str, str]:
@@ -22,4 +24,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-

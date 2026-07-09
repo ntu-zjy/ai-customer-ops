@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     hermes_api_key: str = ""
     hermes_model_name: str = "hermes-agent"
 
+    wecom_kf_token: str = ""
+    wecom_kf_encoding_aes_key: str = ""
+    wecom_corp_id: str = ""
+
     sync_batch_size: int = Field(default=500, ge=1, le=5000)
     analyze_due_limit: int = Field(default=50, ge=1, le=500)
     admin_page_size: int = Field(default=100, ge=10, le=500)

@@ -38,9 +38,10 @@ python -m app.cli analyze-user <crm-user-id>
 3. 参考 `scripts/install_ubuntu.sh` 安装 Python、PostgreSQL、Nginx、venv 和 systemd 单元。
 4. 编辑 `/etc/event-crm/event-crm.env`，填入数据库、Hermes home、WeCom Bot ID、本机 Hermes API key。
 5. 配置 Hermes 独立 home：`HERMES_HOME=/opt/event-crm/hermes-home hermes gateway setup`，选择 WeCom。
-6. 禁用 Hermes 全局记忆：关闭 external memory provider，禁用 memory toolset，保持 `MEMORY.md` 和 `USER.md` 为空或不存在。
-7. 启动服务：`systemctl enable --now hermes-gateway event-crm event-crm-sync.timer event-crm-analyze.timer`。
-8. 打开 `http://<公网 IP>/admin/workbench`，使用 Nginx Basic Auth 账号密码访问。
+6. 如需普通微信外部用户咨询，配置企业微信“微信客服”回调：`http://<公网 IP>/wecom/kf/callback`，并在 `event-crm.env` 填入 `WECOM_KF_TOKEN`、`WECOM_KF_ENCODING_AES_KEY`、`WECOM_CORP_ID`。
+7. 禁用 Hermes 全局记忆：关闭 external memory provider，禁用 memory toolset，保持 `MEMORY.md` 和 `USER.md` 为空或不存在。
+8. 启动服务：`systemctl enable --now hermes-gateway event-crm event-crm-sync.timer event-crm-analyze.timer`。
+9. 打开 `http://<公网 IP>/admin/workbench`，使用 Nginx Basic Auth 账号密码访问。
 
 已有 v0 数据库升级到 v0.2 时，先执行：
 
@@ -67,4 +68,5 @@ python -m app.cli seed-rules
 /admin/rules                  规则配置
 /admin/marketing              营销素材 Skill
 /admin/dashboard              老板经营看板
+/wecom/kf/callback            企业微信微信客服回调验证入口
 ```
